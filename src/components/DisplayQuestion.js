@@ -23,26 +23,26 @@ const styles = {
     borderRadius: "10px",
     backgroundColor: "#f4f4f9",
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-    width: "80%",
+    width: "90%", // 모바일에서도 잘 맞도록 조정
     maxWidth: "600px",
     margin: "20px auto",
     textAlign: "center",
   },
   title: {
-    fontSize: "32px",
+    fontSize: "28px", // 반응형 폰트 크기
     fontWeight: "bold",
     color: "#333",
     marginBottom: "20px",
   },
   question: {
-    fontSize: "24px",
+    fontSize: "20px",
     fontWeight: "500",
     color: "#555",
     lineHeight: "1.5",
     marginBottom: "30px",
   },
   button: {
-    fontSize: "18px",
+    fontSize: "16px",
     fontWeight: "bold",
     color: "#fff",
     backgroundColor: "#4CAF50",
