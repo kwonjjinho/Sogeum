@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Roulette from "../components/Roulette";
 import DisplayQuestion from "../components/DisplayQuestion";
+import "../styles/RoulettePage.css";
 
 const RoulettePage = () => {
   const [questions, setQuestions] = useState([]);
   const [usedQuestions, setUsedQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [answer, setAnswer] = useState("");
+  const [answeredQuestions, setAnsweredQuestions] = useState([]);
+  const navigate = useNavigate();
 
   // 배열을 랜덤하게 섞는 함수
   const shuffleArray = (array) => {
@@ -38,83 +43,87 @@ const RoulettePage = () => {
     }, 1000);
   };
 
+  const handleAnswerSubmit = (e) => {
+    e.preventDefault();
+    if (answer.trim()) {
+      const newAnswer = {
+        question: currentQuestion,
+        answer: answer,
+        timestamp: new Date().toISOString()
+      };
+      setAnsweredQuestions([...answeredQuestions, newAnswer]);
+      setAnswer('');
+      setCurrentQuestion(null);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleAnswerSubmit(e);
+    }
+  };
+
   const handleNext = () => {
     setCurrentQuestion(null);
   };
 
-  const styles = {
-    container: {
-      display: "flex",
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "flex-start",
-      height: "100vh",
-      backgroundColor: "#f0f8ff",
-      padding: "20px",
-      fontFamily: "Arial, sans-serif",
-    },
-    mainContent: {
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      flex: 2,
-      textAlign: "center",
-    },
-    rouletteContainer: {
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    usedQuestions: {
-      flex: 1,
-      backgroundColor: "#fff",
-      borderRadius: "8px",
-      padding: "20px",
-      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-      overflowY: "auto",
-      maxHeight: "90vh",
-    },
-    questionItem: {
-      padding: "10px",
-      borderBottom: "1px solid #ddd",
-    },
-    title: {
-      fontSize: "36px",
-      marginBottom: "20px",
-      fontWeight: "bold",
-    },
-    gameOver: {
-      fontSize: "24px",
-      color: "#e74c3c",
-    },
+  const handleFinish = () => {
+    navigate("/");
   };
 
-  if (loading) return <p>Loading questions...</p>;
+  if (loading) return <p>Loading...</p>;
 
   return (
-    <div style={styles.container}>
-      <div style={styles.mainContent}>
-        <h1 style={styles.title}>🎡 소금부 질문룰렛</h1>
-        {!currentQuestion && questions.length > 0 && (
-          <div style={styles.rouletteContainer}>
-            <Roulette questions={questions} onSpin={handleSpin} />
-          </div>
-        )}
+    <div className="roulette-container">
+      <h1 className="page-title">소금부 질문룰렛</h1>
+      <div className="content-container">
         {currentQuestion && (
-          <DisplayQuestion question={currentQuestion} onNext={handleNext} />
-        )}
-        {questions.length === 0 && (
-          <h2 style={styles.gameOver}>질문이 끝났습니다!</h2>
-        )}
-      </div>
-      <div style={styles.usedQuestions}>
-        <h2>나온 질문들</h2>
-        {usedQuestions.map((question, index) => (
-          <div key={index} style={styles.questionItem}>
-            {index + 1}. {question}
+          <div className="left-section">
+            <div className="question-card">
+              <h2>현재 질문</h2>
+              <div className="question-content">
+                <p>{currentQuestion}</p>
+              </div>
+              <form className="answer-form" onSubmit={handleAnswerSubmit}>
+                <textarea
+                  className="answer-input"
+                  value={answer}
+                  onChange={(e) => setAnswer(e.target.value)}
+                  placeholder="답변을 입력하세요..."
+                  onKeyPress={handleKeyPress}
+                />
+                <button type="submit" className="submit-button">
+                  제출
+                </button>
+              </form>
+            </div>
           </div>
-        ))}
+        )}
+
+        <div className={`right-section ${!currentQuestion ? 'full-width' : ''}`}>
+          <div className="roulette-section">
+            {questions.length > 0 && !currentQuestion && (
+              <Roulette questions={questions} onSpin={handleSpin} />
+            )}
+          </div>
+          
+          <div className="answered-questions">
+            <h2>답변된 질문들</h2>
+            {answeredQuestions.map((item, index) => (
+              <div key={index} className="answered-item">
+                <p className="question-text">Q: {item.question}</p>
+                <p className="answer-text">A: {item.answer}</p>
+              </div>
+            ))}
+          </div>
+
+          {questions.length === 0 && !currentQuestion && (
+            <button onClick={handleFinish} className="finish-button">
+              완료
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
