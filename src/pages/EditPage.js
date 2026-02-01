@@ -25,7 +25,7 @@ const EditPage = () => {
 
   // 질문 저장
   const saveQuestions = () => {
-    fetch("http://localhost:5001/api/save-questions", {
+    fetch("/api/save-questions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

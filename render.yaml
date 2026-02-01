@@ -1,0 +1,10 @@
+# Render 무료 배포 설정 (https://render.com)
+services:
+  - type: web
+    name: sogeum
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: node server/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production

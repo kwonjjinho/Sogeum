@@ -5,6 +5,8 @@ const cors = require("cors");
 
 const app = express();
 const PORT = process.env.PORT || 5001;
+const buildPath = path.join(__dirname, "../build");
+const hasBuild = require("fs").existsSync(buildPath);
 
 app.use(cors());
 app.use(express.json());
@@ -12,30 +14,31 @@ app.use(express.json());
 // 질문 저장 API
 app.post("/api/save-questions", (req, res) => {
   const questions = req.body;
-  const filePath = path.join(__dirname, "../public/questions.json");
+  const filePath = hasBuild
+    ? path.join(__dirname, "../build/questions.json")
+    : path.join(__dirname, "../public/questions.json");
 
-  console.log("Saving to:", filePath);
-  console.log("Received data:", questions);
-
-  // 데이터 유효성 검사
   if (!Array.isArray(questions)) {
-    console.error("Invalid data format. Expected an array.");
     return res.status(400).send("Invalid data format. Expected an array.");
   }
 
-  // 파일 쓰기
   fs.writeFile(filePath, JSON.stringify(questions, null, 2), (err) => {
     if (err) {
       console.error("Failed to save questions:", err);
       return res.status(500).send("Failed to save questions.");
     }
-
-    console.log("Questions saved successfully.");
     res.status(200).send("Questions saved successfully.");
   });
 });
 
-// 서버 실행
+// build 폴더가 있으면 React 빌드 파일 제공 (Render 등 배포 환경)
+if (hasBuild) {
+  app.use(express.static(buildPath));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(buildPath, "index.html"));
+  });
+}
+
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
